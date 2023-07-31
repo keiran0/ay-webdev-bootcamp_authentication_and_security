@@ -1,7 +1,10 @@
+require('dotenv').config(); //no need for const. require and call config, and that's all. The .env file is included in the gitignore file.
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption")
+const encrypt = require("mongoose-encryption");
+
+
 
 db = mongoose.connect("mongodb://127.0.0.1:27017/userDB")
 
@@ -21,17 +24,17 @@ app.get("/register", function(req, res){
     res.render("register")
 })
 
-//Level 2 authentication - Encryption with mongoose-encryption
+//Level 3 authentication - adding dotenv. Do not add any semicolons, its not javascript. No need for quotes as well. Omit spaces.
+
+console.log(process.env.SECRET)
 
 const userSchema = new mongoose.Schema({
     email: String,
     password: String
 })
 
-const secret = "Thisisourlittlesecret." //still pretty dangerous. app.js may be revealed, not that difficult to find. But better than no encryption.
-
 //Important to add this plugin to the schema before you create the mongoose model.
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ['password']}) //encrypt entire database without the encryptedFields key. You may not want this, so it is changed to encrypt only the password. It will encrypt when you call 'save', and decrypt when you call 'find'
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ['password']}) //encrypt entire database without the encryptedFields key. You may not want this, so it is changed to encrypt only the password. It will encrypt when you call 'save', and decrypt when you call 'find'
 
 const User = mongoose.model("User", userSchema);
 
@@ -53,7 +56,6 @@ app.post("/login", function(req, res){
 
     User.findOne({email:username})
         .then(function(user){
-            console.log(user)
             if (user.password === password){
                 res.render("secrets");
             } else {
